@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<div id="t1">
+</div>
+<style>
+    #t1 {
+        position: relative;
+        width: calc(100vw - 400px);
+        height: 80vh;
+    }
+</style>
+<script src="./EditTable.min.js"></script>
+<script>
+    const et = document.createElement("edit-table");
+    document.getElementById("t1").appendChild(et);
+    let header = [];
+    for (let j = 1; j <= 15; j++) {
+        header.push(j);
+    }
+    et.setHeader(header);
+    let data = [];
+    for (let i = 1; i <= 1000; ++i) {
+        let item = [];
+        for (let j = 1; j <= 15; j++) {
+            item.push(i + "-" + j);
+        }
+        data.push(item);
+    }
+    et.setData(data);
+</script>
