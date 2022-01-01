@@ -6,6 +6,8 @@
 
 ![](./EditTable.gif)
 
+デモ：[https://gearsns.github.io/EditTable/](https://gearsns.github.io/EditTable/)
+
 ## 動作環境
 Chrome, Firefox(仮)
 
