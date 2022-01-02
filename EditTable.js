@@ -193,7 +193,7 @@ class EditTableElement extends HTMLElement {
 		this.mainElement.className = "EditTable";
 		this.mainElement.innerHTML = `
 		<div id='main' class='sticky_table'>
-		<div id="bk_area"><div id="text_area"><div id="text_dummy" aria-hidden="true">></div><textarea id="text"></textarea></div><div id="cursor"></div><div id="selection"></div></div>
+		<div id="bk_area"><div id="text_area"><div id="text_dummy" aria-hidden="true"></div><textarea id="text"></textarea></div><div id="cursor"></div><div id="selection"></div></div>
 		<table id='table' class='sticky_table'><thead id='et_header'></thead><tbody id='et_body'></tbody></table>
 		</div>`;
 		this.shadow.appendChild(this.mainElement);
@@ -436,9 +436,9 @@ class EditTableElement extends HTMLElement {
 		return erow.cells[col];
 	}
 	#refreshHeader = () => {
-		this.eheader.style.visibility = "hidden";
+		this.ethead.style.visibility = "hidden";
 		setTimeout(() => {
-			this.eheader.style.visibility = "visible";
+			this.ethead.style.visibility = "visible";
 		}, 0);
 	}
 	setCellText = (col, row, val, noHiistory) => {
@@ -771,21 +771,22 @@ class EditTableElement extends HTMLElement {
 		if (e.ctrlKey) {
 			key = `C-${key}`;
 		}
+		if (e.metaKey) { // For mac
+			key = `C-${key}`;
+		}
 		return key;
 	}
 	#setEvent = () => {
 		const etext = this.etext;
+		etext.addEventListener("paste", e => {
+			if (!this.bEditing) { // For mac
+				this.etext.value = (e.clipboardData || window.clipboardData).getData('text');
+				this.#pasteInput();
+			}
+		});
 		etext.addEventListener("keyup", e => {
 			if (this.bEditing) {
 				this.#resizeText();
-			} else {
-				const key = this.#getKeyString(e);
-				switch (key) {
-					case "C-v":
-					case "C-V":
-						setTimeout(this.#pasteInput, 0);
-						break;
-				}
 			}
 		});
 		etext.addEventListener("keydown", e => {
@@ -1262,14 +1263,14 @@ class EditTableElement extends HTMLElement {
 	///
 	static #regUnescapeHTML = null;
 	static #UnescapeHTMLCharacterReference = { '<br>': '\n', '&nbsp;': ' ', '&quot;': '"', '&amp;': '&', '&#39;': '\'', '&lt;': '<', '&gt;': '>' };
-	static {
-		let keylist = [];
-		for (const key in EditTableElement.#UnescapeHTMLCharacterReference) {
-			keylist.push(key);
-		}
-		EditTableElement.#regUnescapeHTML = new RegExp(keylist.join("|"), 'ig');
-	}
 	static #unescapeHTML(text) {
+		if (!EditTableElement.#regUnescapeHTML) { // For Safari
+			let keylist = [];
+			for (const key in EditTableElement.#UnescapeHTMLCharacterReference) {
+				keylist.push(key);
+			}
+			EditTableElement.#regUnescapeHTML = new RegExp(keylist.join("|"), 'ig');
+		}
 		if (text) {
 			return text.replace(EditTableElement.#regUnescapeHTML,
 				ch => EditTableElement.#UnescapeHTMLCharacterReference[ch.toLowerCase()]
@@ -1280,14 +1281,14 @@ class EditTableElement extends HTMLElement {
 	}
 	static #regEscapeHTML = null;
 	static #EscapeHTMLCharacterReference = { '\r\n': '<br>', '\r': '<br>', '\n': '<br>', ' ': '&nbsp;', '"': '&quot;', '&': '&amp;', '\'': '&#39;', '<': '&lt;', '>': '&gt;' };
-	static {
-		let keylist = [];
-		for (const key in EditTableElement.#EscapeHTMLCharacterReference) {
-			keylist.push(key);
-		}
-		EditTableElement.#regEscapeHTML = new RegExp(keylist.join("|"), 'ig');
-	}
 	static #escapeHTML(text) {
+		if (!EditTableElement.#regEscapeHTML) { // For Safari
+			let keylist = [];
+			for (const key in EditTableElement.#EscapeHTMLCharacterReference) {
+				keylist.push(key);
+			}
+			EditTableElement.#regEscapeHTML = new RegExp(keylist.join("|"), 'ig');
+		}
 		return text.replace(EditTableElement.#regEscapeHTML,
 			ch => EditTableElement.#EscapeHTMLCharacterReference[ch]
 		);
